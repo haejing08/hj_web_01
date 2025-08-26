@@ -1,0 +1,40 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* HTML5 요소 스타일 정리 */
+article, aside, footer, header, nav, section {
+  display: block;
+}
+
+/* 폰트 상속 문제 해결 */
+button, input {
+  font: inherit;
+}
+
+h1, h2, h3, p, ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}

@@ -1,0 +1,49 @@
+#wrap {
+    
+}
+
+.topbar {
+    background: #000;
+    color: #fff;
+    text-align: center;
+    padding: 11px;
+}
+
+
+.topbar__list > .topbar__item > .topbar__link  {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2em;
+}
+
+.topbar__list > .topbar__item > .topbar__link > span {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+header {
+    border: 1px solid red;
+    background-color: antiquewhite;
+    margin: 0 auto;
+    height: 62px;
+    width: 100%;
+    max-width: 2560px;
+    padding: 0 120px;
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.nav {
+    border: 1px solid red;
+}
+
+.nav > .nav__list {
+    display: flex;
+}
+
+.icon {
+    display: flex;
+}
