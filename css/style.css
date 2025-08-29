@@ -1,5 +1,4 @@
 #wrap {
-    
 }
 
 .topbar {
@@ -23,8 +22,7 @@
 }
 
 header {
-    border: 1px solid red;
-    background-color: antiquewhite;
+    background-color: transparent;
     margin: 0 auto;
     height: 62px;
     width: 100%;
@@ -34,16 +32,115 @@ header {
     justify-content: space-between;
     box-sizing: border-box;
     align-items: center;
+    position: absolute;
+    border-bottom: 1px solid #EBEBEB;
+    color: #fff;
 }
 
-.nav {
-    border: 1px solid red;
+.nav__link {
+        font-weight: 700;
 }
 
 .nav > .nav__list {
     display: flex;
+    justify-content: center;
+    height: 100%;
+    align-items: center;
+    gap: 50px;
+}
+
+.nav__item > .dot_event {
+    position: relative;
+}
+
+.nav__item > .dot_event::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: calc(50% - 10px);
+    right: -8px;
+    transform: translate(0, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #FA622F;
+}
+
+.nav__item > .dot_event.color1::before {
+     background-color: #FA622F;
+}
+
+.nav__item > .dot_event.color2::before {
+     background-color: #204D6A;
+}
+
+.nav__item > .dot_event.color3::before {
+     background-color: #17BAFF;
 }
 
 .icon {
     display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.banner_box__p {
+    position: absolute;
+    top: 40%;
+    left: 30%;
+    transform: translate(-50%,-50%);
+}
+
+.banner_box__p > .banner_text_01 {
+    font-size: 40px;
+    color: #FFF;
+    font-weight: 600;  
+}
+
+.banner_box__p > .banner_text_02 {
+    margin: 17px 0 0;
+    font-weight: 500;
+    font-size: 20px;
+    color: #FFF;
+}
+
+.banner_box__p > .banner_text_03 {
+    display: inline-block;
+    line-height: 1;
+    margin: 17px 0 0;
+    padding: 17px 33px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 60px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.section_product {
+   margin: 90px auto 0;
+    padding: 0 0 0 120px; 
+}
+
+.section_product > .main_product {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    color: #1D1D1F;
+    margin: 0 0 60px;
+}
+
+.product__list_div > .product__list-link > img {
+    width: 267px;
+    height: 267px;
+    border: 1px solid red;
+}
+
+.nav_event_text .swiper {
+  height: 20px; 
+  overflow: hidden;
+}
+.nav_event_text .swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

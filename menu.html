@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>쇼핑몰 카테고리 예제</title>
+<style>
+  :root{
+    --bg:#f6f7fb;
+    --card:#ffffff;
+    --primary:#111827;
+    --accent:#0ea5a4;
+    --muted:#6b7280;
+    --border:#e6e9ef;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+    background:var(--bg);
+    color:var(--primary);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Layout */
+  .container{
+    max-width:1200px;
+    margin: 24px auto;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+  }
+
+  /* Mobile: single column */
+  @media (max-width:900px){
+    .container{
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Sidebar card */
+  .sidebar{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    height: fit-content;
+    box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+  }
+
+  .category-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    padding:8px 4px;
+    margin-bottom:8px;
+  }
+  .category-header h2{
+    font-size:16px;
+    margin:0;
+  }
+  .filter-btn {
+    display:none;
+  }
+
+  /* Category list */
+  .cat-list{ list-style:none; padding:0; margin:0; }
+  .cat-item{
+    border-radius:8px;
+    padding:8px;
+    margin:6px 0;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    cursor:pointer;
+  }
+  .cat-item:hover{ background:rgba(14,165,164,0.06) }
+  .cat-title{
+    flex:1;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+  }
+  .cat-title button{
+    background:none;
+    border:0;
+    font-size:14px;
+    cursor:pointer;
+    color:var(--muted);
+  }
+
+  .count{
+    font-size:13px;
+    color:var(--muted);
+    min-width:36px;
+    text-align:right;
+  }
+
+  /* Subcategory */
+  .sub-list{
+    list-style:none;
+    padding-left:12px;
+    margin:6px 0 0 0;
+    display:none;
+  }
+  .sub-item{
+    padding:6px 8px;
+    border-radius:6px;
+    font-size:14px;
+    color:var(--muted);
+  }
+  .sub-item:hover{ background:rgba(0,0,0,0.03); color:var(--primary) }
+
+  /* Main content (category grid) */
+  .main{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px;
+    min-height:300px;
+    box-shadow: 0 6px 18px rgba(15,23,42,0.03);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:12px;
+  }
+  @media (max-width:1100px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width:600px){ .grid{ grid-template-columns: 1fr; } }
+
+  .cat-card{
+    border-radius:10px;
+    border:1px solid var(--border);
+    padding:12px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    background:linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.9) 100%);
+  }
+  .cat-card .thumb{
+    width:64px;
+    height:64px;
+    border-radius:8px;
+    background:linear-gradient(135deg,#eef2ff,#fff);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+  }
+  .cat-card .meta h3{ margin:0; font-size:16px; }
+  .cat-card .meta p{ margin:4px 0 0; color:var(--muted); font-size:13px; }
+
+  /* Mobile: offcanvas open button */
+  .mobile-open{
+    display:none;
+    position:fixed;
+    right:16px;
+    bottom:20px;
+    z-index:1000;
+    background:var(--accent);
+    color:white;
+    border:0;
+    padding:12px 14px;
+    border-radius:999px;
+    box-shadow:0 8px 20px rgba(14,165,164,0.18);
+    cursor:pointer;
+  }
+  @media(max-width:900px){
+    .mobile-open{ display:block; }
+    .sidebar{
+      position:fixed;
+      left:-360px;
+      top:16px;
+      width:320px;
+      max-height:calc(100vh - 32px);
+      overflow:auto;
+      transition:left .28s ease;
+      z-index:1200;
+    }
+    .sidebar.open{ left:16px; }
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.28);
+      display:none;
+      z-index:1100;
+    }
+    .overlay.show{ display:block; }
+  }
+
+  /* caret */
+  .caret{ transform:rotate(0); transition: transform .18s ease; }
+  .caret.open{ transform:rotate(90deg); }
+
+  /* small helpers */
+  .small{ font-size:13px; color:var(--muted); }
+  a.link{ color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<!-- mobile overlay for off-canvas -->
+<div class="overlay" id="overlay" tabindex="-1" aria-hidden="true"></div>
+
+<div class="container" role="main">
+
+  <!-- Sidebar (categories) -->
+  <aside class="sidebar" id="sidebar" aria-label="상품 카테고리">
+    <div class="category-header">
+      <h2>카테고리</h2>
+      <div class="small">총 8개 섹션</div>
+    </div>
+
+    <ul class="cat-list" id="catList">
+      <!-- 카테고리 아이템 (반복) -->
+      <li class="cat-item" data-id="1" aria-expanded="false">
+        <div class="cat-title">
+          <strong>👜 여성패션</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="count">1,234</div>
+            <button class="toggle-sub" aria-label="여성패션 서브 카테고리 열기" aria-controls="sub-1">
+              <span class="caret">▶</span>
+            </button>
+          </div>
+        </div>
+
+        <ul class="sub-list" id="sub-1" role="group" aria-hidden="true">
+          <li class="sub-item"><a href="#" class="link">원피스</a></li>
+          <li class="sub-item"><a href="#" class="link">아우터</a></li>
+          <li class="sub-item"><a href="#" class="link">상의</a></li>
+        </ul>
+      </li>
+
+      <li class="cat-item" data-id="2" aria-expanded="false">
+        <div class="cat-title">
+          <strong>👞 남성패션</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="count">987</div>
+            <button class="toggle-sub" aria-label="남성패션 서브 카테고리 열기" aria-controls="sub-2">
+              <span class="caret">▶</span>
+            </button>
+          </div>
+        </div>
+        <ul class="sub-list" id="sub-2" role="group" aria-hidden="true">
+          <li class="sub-item"><a href="#" class="link">셔츠</a></li>
+          <li class="sub-item"><a href="#" class="link">팬츠</a></li>
+          <li class="sub-item"><a href="#" class="link">신발</a></li>
+        </ul>
+      </li>
+
+      <li class="cat-item" data-id="3" aria-expanded="false">
+        <div class="cat-title">
+          <strong>💄 뷰티</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="count">543</div>
+            <button class="toggle-sub" aria-label="뷰티 서브 카테고리 열기" aria-controls="sub-3">
+              <span class="caret">▶</span>
+            </button>
+          </div>
+        </div>
+        <ul class="sub-list" id="sub-3" role="group" aria-hidden="true">
+          <li class="sub-item"><a href="#" class="link">스킨케어</a></li>
+          <li class="sub-item"><a href="#" class="link">메이크업</a></li>
+        </ul>
+      </li>
+
+      <li class="cat-item" data-id="4" aria-expanded="false">
+        <div class="cat-title">
+          <strong>🏠 리빙</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="count">431</div>
+            <button class="toggle-sub" aria-label="리빙 서브 카테고리 열기" aria-controls="sub-4">
+              <span class="caret">▶</span>
+            </button>
+          </div>
+        </div>
+        <ul class="sub-list" id="sub-4" role="group" aria-hidden="true">
+          <li class="sub-item"><a href="#" class="link">주방용품</a></li>
+          <li class="sub-item"><a href="#" class="link">수납/정리</a></li>
+        </ul>
+      </li>
+
+      <!-- 간단히 더 추가 -->
+      <li class="cat-item" data-id="5" aria-expanded="false">
+        <div class="cat-title">
+          <strong>📱 디지털</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="count">210</div>
+            <button class="toggle-sub" aria-label="디지털 서브 카테고리 열기" aria-controls="sub-5">
+              <span class="caret">▶</span>
+            </button>
+          </div>
+        </div>
+        <ul class="sub-list" id="sub-5" role="group" aria-hidden="true">
+          <li class="sub-item"><a href="#" class="link">스마트폰</a></li>
+          <li class="sub-item"><a href="#" class="link">액세서리</a></li>
+        </ul>
+      </li>
+
+      <li class="cat-item" data-id="6" aria-expanded="false">
+        <div class="cat-title">
+          <strong>🎒 스포츠</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="count">167</div>
+            <button class="toggle-sub" aria-label="스포츠 서브 카테고리 열기" aria-controls="sub-6">
+              <span class="caret">▶</span>
+            </button>
+          </div>
+        </div>
+        <ul class="sub-list" id="sub-6" role="group" aria-hidden="true">
+          <li class="sub-item"><a href="#" class="link">운동화</a></li>
+          <li class="sub-item"><a href="#" class="link">운동복</a></li>
+        </ul>
+      </li>
+
+      <li class="cat-item" data-id="7" aria-expanded="false">
+        <div class="cat-title">
+          <strong>🧒 베이비/완구</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="count">98</div>
+            <button class="toggle-sub" aria-label="베이비 서브 카테고리 열기" aria-controls="sub-7">
+              <span class="caret">▶</span>
+            </button>
+          </div>
+        </div>
+        <ul class="sub-list" id="sub-7" role="group" aria-hidden="true">
+          <li class="sub-item"><a href="#" class="link">장난감</a></li>
+          <li class="sub-item"><a href="#" class="link">유아용품</a></li>
+        </ul>
+      </li>
+
+      <li class="cat-item" data-id="8" aria-expanded="false">
+        <div class="cat-title">
+          <strong>📚 도서</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="count">42</div>
+            <button class="toggle-sub" aria-label="도서 서브 카테고리 열기" aria-controls="sub-8">
+              <span class="caret">▶</span>
+            </button>
+          </div>
+        </div>
+        <ul class="sub-list" id="sub-8" role="group" aria-hidden="true">
+          <li class="sub-item"><a href="#" class="link">소설</a></li>
+          <li class="sub-item"><a href="#" class="link">에세이</a></li>
+        </ul>
+      </li>
+
+    </ul>
+  </aside>
+
+  <!-- Main content: 예시 카테고리 그리드 -->
+  <section class="main" aria-label="카테고리 상세">
+    <h2 style="margin:0 0 12px 0;">카테고리 하이라이트</h2>
+    <p class="small" style="margin-bottom:12px">카테고리를 클릭하면 해당 섹션의 상품 리스트로 이동하도록 연결하세요.</p>
+
+    <div class="grid" id="categoryGrid">
+      <article class="cat-card">
+        <div class="thumb">👗</div>
+        <div class="meta">
+          <h3>여성 원피스</h3>
+          <p class="small">신상 원피스 · 342개</p>
+        </div>
+      </article>
+
+      <article class="cat-card">
+        <div class="thumb">🧥</div>
+        <div class="meta">
+          <h3>남성 아우터</h3>
+          <p class="small">아우터 추천 · 198개</p>
+        </div>
+      </article>
+
+      <article class="cat-card">
+        <div class="thumb">💄</div>
+        <div class="meta">
+          <h3>뷰티 베스트</h3>
+          <p class="small">스킨케어 · 123개</p>
+        </div>
+      </article>
+
+      <article class="cat-card">
+        <div class="thumb">🏡</div>
+        <div class="meta">
+          <h3>홈 리빙</h3>
+          <p class="small">주방/인테리어 · 84개</p>
+        </div>
+      </article>
+
+      <article class="cat-card">
+        <div class="thumb">📱</div>
+        <div class="meta">
+          <h3>디지털 액세서리</h3>
+          <p class="small">케이스/충전기 · 65개</p>
+        </div>
+      </article>
+
+      <article class="cat-card">
+        <div class="thumb">🎒</div>
+        <div class="meta">
+          <h3>스포츠 용품</h3>
+          <p class="small">런닝/운동화 · 47개</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+</div>
+
+<!-- Mobile open button -->
+<button class="mobile-open" id="mobileOpen" aria-controls="sidebar" aria-expanded="false" aria-label="카테고리 메뉴 열기">카테고리</button>
+
+<script>
+  // 토글 스크립트 (서브카테고리 열기/닫기)
+  document.querySelectorAll('.toggle-sub').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const li = btn.closest('.cat-item');
+      const sub = document.getElementById(btn.getAttribute('aria-controls'));
+      const caret = btn.querySelector('.caret');
+
+      const expanded = li.getAttribute('aria-expanded') === 'true';
+      // close others? (선택사항) - 아래 주석 풀면 아코디언처럼 동작
+      // document.querySelectorAll('.cat-item[aria-expanded="true"]').forEach(open=>{ if(open !== li){ open.setAttribute('aria-expanded','false'); open.querySelector('.sub-list').style.display='none'; open.querySelector('.caret').classList.remove('open'); }});
+
+      if(expanded){
+        sub.style.display = 'none';
+        li.setAttribute('aria-expanded','false');
+        sub.setAttribute('aria-hidden','true');
+        caret.classList.remove('open');
+      } else {
+        sub.style.display = 'block';
+        li.setAttribute('aria-expanded','true');
+        sub.setAttribute('aria-hidden','false');
+        caret.classList.add('open');
+      }
+    });
+  });
+
+  // 카테고리 클릭 시 (예: 메인 그리드 업데이트) - 예시로 콘솔에 표시
+  document.querySelectorAll('.cat-item').forEach(li=>{
+    li.addEventListener('click', ()=>{
+      const title = li.querySelector('.cat-title > strong').innerText;
+      // 실제로는 여기서 AJAX 호출하거나 페이지 이동 처리
+      console.log('카테고리 선택:', title);
+      // 간단한 피드백
+      const main = document.querySelector('.main h2');
+      main.innerText = title + ' · 추천 상품';
+    });
+  });
+
+  // 모바일 오프캔버스 열기/닫기
+  const mobileOpen = document.getElementById('mobileOpen');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  function openSidebar(){
+    sidebar.classList.add('open');
+    overlay.classList.add('show');
+    mobileOpen.setAttribute('aria-expanded','true');
+    overlay.setAttribute('aria-hidden','false');
+  }
+  function closeSidebar(){
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+    mobileOpen.setAttribute('aria-expanded','false');
+    overlay.setAttribute('aria-hidden','true');
+  }
+
+  mobileOpen.addEventListener('click', openSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  // ESC 키로 닫기
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){
+      closeSidebar();
+    }
+  });
+</script>
+
+</body>
+</html>
